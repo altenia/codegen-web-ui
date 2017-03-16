@@ -1,0 +1,30 @@
+{
+  "name": "codegen-web-ui",
+  "version": "0.1.0",
+  "description": "Code generator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/altenia/codegen-web-ui.git"
+  },
+  "author": "Young Suk Ahn Park",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/altenia/codegen-web-ui/issues"
+  },
+  "homepage": "https://github.com/altenia/codegen-web-ui#readme",
+  "dependencies": {
+    "@types/react": "^15.0.16",
+    "@types/react-dom": "^0.14.23",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2"
+  },
+  "devDependencies": {
+    "awesome-typescript-loader": "^3.1.2",
+    "source-map-loader": "^0.2.0",
+    "typescript": "^2.2.1"
+  }
+}
