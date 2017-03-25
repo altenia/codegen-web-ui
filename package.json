@@ -20,9 +20,11 @@
     "@types/react": "^15.0.16",
     "@types/react-dom": "^0.14.23",
     "react": "^15.4.2",
+    "react-data-grid": "^2.0.19",
     "react-dom": "^15.4.2"
   },
   "devDependencies": {
+    "@types/material-ui": "^0.16.57",
     "awesome-typescript-loader": "^3.1.2",
     "source-map-loader": "^0.2.0",
     "typescript": "^2.2.1"
