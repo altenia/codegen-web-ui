@@ -14,7 +14,10 @@ const initialState : SchemaStateType = [];
 
 export type ReduxStore = Redux.Store<SchemaStateType>;
 
-export const store : ReduxStore = Redux.createStore(mainReducer, initialState);
+export const store : ReduxStore = Redux.createStore(
+    mainReducer, initialState,
+    (<any>window).__REDUX_DEVTOOLS_EXTENSION__ && (<any>window).__REDUX_DEVTOOLS_EXTENSION__()
+    );
 
 
 

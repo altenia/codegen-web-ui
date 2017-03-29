@@ -5,7 +5,9 @@ import * as Redux from "redux";
 import{ connect } from "react-redux";
 
 import * as ReactDataGrid from 'react-data-grid';
+
 import * as schema from '../model/schema';
+import * as schemaUtils from '../schema-utils';
 
 import * as actions from '../actions';
 import * as context from '../context';
@@ -16,11 +18,13 @@ interface TableDefStateProps {
     schema: context.SchemaStateType; 
 }
 interface TableDefDispatchProps { 
-    onAddField: (pos: number) => void; 
+    onImportCsv: (data: string) => void;
+    onAddField: (pos: number) => void;
 }
 
 interface TableDefState {
-    columns: Array<AdazzleReactDataGrid.Column>
+    columns: Array<AdazzleReactDataGrid.Column>,
+    importData: string
 }
 
 
@@ -42,35 +46,42 @@ class TableDefGrid extends React.Component<TableDefStateProps & TableDefDispatch
               { key: 'isNullable', name: 'Nullable' },
               { key: 'isUnique', name: 'Unique' },
               { key: 'defaultVal', name: 'Default value' }
-            ]
+            ],
+            // Form input
+            importData: ''
         };
         
         // Component doesn't auto bind methods to itself, explicit binding is needed.
         this.rowGetter = this.rowGetter.bind(this);
-        this.insertEmpty = this.insertEmpty.bind(this);
+        this.handleImportDataClick = this.handleImportDataClick.bind(this);
+        this.handleImportDataChange = this.handleImportDataChange.bind(this);
     }
     
     rowGetter(i: number) {
         return this.props.schema[i];
     }
     
-    insertEmpty(e: any)
-    {
-        e.preventDefault();
-        console.log('The link was clicked.');
+    handleImportDataClick(event: any) {
+        this.props.onImportCsv(this.state.importData);
     }
     
+    handleImportDataChange(event: any) {
+        this.setState({importData: event.target.value});
+    }
+
     render() {
         return  (
             <div>
+                <textarea name="importData" value={this.state.importData}
+ onChange={this.handleImportDataChange} ></textarea>
+                <button onClick={ this.handleImportDataClick } >Import</button>
                 <ReactDataGrid
                     columns={this.state.columns}
                     rowGetter={this.rowGetter}
                     rowsCount={this.props.schema.length}
                     minHeight={200} />
                 <br />
-                <button
-                    onClick={ () => this.props.onAddField(0)} >Add</button>
+                <button onClick={ () => this.props.onAddField(0)} >Add</button>
             </div>
         );
     }
@@ -86,18 +97,16 @@ function mapStateToProps (state: context.SchemaStateType): TableDefStateProps {
 function mapDispatchToProps(dispatch: any): TableDefDispatchProps {
     return {
         onAddField: (pos: number) => {
-            let fieldDef: schema.FieldDef = {
-                id: "string",
-                name: "test",
-                type: "VARCHAR",
-                typeModif: "(20)",
-                isPrimary: false,
-                isNullable: false,
-                isUnique: false,
-                defaultVal: ""
-            };
+            let fieldDef: schema.FieldDef = schemaUtils.createFieldDef("1", "id1", "VARCHAR");
             dispatch ( actions.addField(pos, fieldDef) );
+        },
+        onImportCsv: (data: string) => {
+            let fields = schemaUtils.csvToFields(data);
+            for(let fieldDef of fields) {
+                dispatch ( actions.addField(0, fieldDef) );
+            }
         }
+        
     };
 }
 
