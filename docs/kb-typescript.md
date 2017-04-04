@@ -22,3 +22,10 @@ In (this example)[https://rjzaworski.com/2016/08/typescript-redux-and-react] sug
   ```
 
 https://github.com/typings/typings
+
+
+
+From: https://github.com/adazzle/react-data-grid/issues/269
+    typings i react-data-grid --save --source dt --global
+    and imported like this:
+    import * as ReactDataGrid from 'react-data-grid';

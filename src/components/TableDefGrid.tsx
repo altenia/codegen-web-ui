@@ -5,12 +5,27 @@ import * as Redux from "redux";
 import{ connect } from "react-redux";
 
 import * as ReactDataGrid from 'react-data-grid';
+import { Editors, Formatters } from 'react-data-grid-addons';
+
 
 import * as schema from '../model/schema';
 import * as schemaUtils from '../schema-utils';
 
 import * as actions from '../actions';
 import * as context from '../context';
+
+const { DropDownEditor } = Editors;
+const { DropDownFormatter } = Formatters;
+
+const DATA_TYPES = [
+  { id: 'boolean', value: 'BOOLEAN', text: 'BOOLEAN', title: 'Bug' },
+  { id: 'story', value: 'story', text: 'Story', title: 'Story' }
+];
+const DataTypesEditor = <DropDownEditor options={DATA_TYPES}/>;
+
+const DataTypesFormatter = <DropDownFormatter options={DATA_TYPES} value="boolean"/>;
+
+
 
 //export interface TableDefProps { store: context.ReduxStore  }
 //interface TableDefProps { store: context.ReduxStore  }
@@ -20,6 +35,7 @@ interface TableDefStateProps {
 interface TableDefDispatchProps { 
     onImportCsv: (data: string) => void;
     onAddField: (pos: number) => void;
+    onModifyField: (index: number, fieldDef: schema.FieldDef) => void;
 }
 
 interface TableDefState {
@@ -38,9 +54,9 @@ class TableDefGrid extends React.Component<TableDefStateProps & TableDefDispatch
         //this.setState({columns:  [
         this.state = {
             columns:  [
-              { key: 'id', name: 'ID' },
+              { key: 'id', name: 'ID', width: 40 },
               { key: 'name', name: 'Name' },
-              { key: 'type', name: 'Type' },
+              { key: 'type', name: 'Type', editor: DataTypesEditor, formatter: DataTypesFormatter },
               { key: 'typeModif', name: 'Type Modifier' },
               { key: 'isPrimary', name: 'Primary' },
               { key: 'isNullable', name: 'Nullable' },
@@ -55,6 +71,7 @@ class TableDefGrid extends React.Component<TableDefStateProps & TableDefDispatch
         this.rowGetter = this.rowGetter.bind(this);
         this.handleImportDataClick = this.handleImportDataClick.bind(this);
         this.handleImportDataChange = this.handleImportDataChange.bind(this);
+        this.handleGridRowsUpdated = this.handleGridRowsUpdated.bind(this);
     }
     
     rowGetter(i: number) {
@@ -68,18 +85,37 @@ class TableDefGrid extends React.Component<TableDefStateProps & TableDefDispatch
     handleImportDataChange(event: any) {
         this.setState({importData: event.target.value});
     }
+    
+    handleGridRowsUpdated({ fromRow, toRow, updated }: any) {
+        let rows = this.props.schema.slice(); // shallow copy of array
+        
+        for (let i = fromRow; i <= toRow; i++) {
+            let rowToUpdate = rows[i];
+            for(var key in updated) {
+                (rowToUpdate as any)[key] = updated[key];
+            }
+            this.props.onModifyField(i, rowToUpdate);
+            //let updatedRow = React.addons.update(rowToUpdate, {$merge: updated});
+            //rows[i] = updatedRow;
+        }
+        
+        //this.setState({ rows });
+    }
+
 
     render() {
         return  (
             <div>
-                <textarea name="importData" value={this.state.importData}
- onChange={this.handleImportDataChange} ></textarea>
+                <textarea name="importData" value={this.state.importData} 
+                    onChange={this.handleImportDataChange} ></textarea>
                 <button onClick={ this.handleImportDataClick } >Import</button>
                 <ReactDataGrid
+                    enableCellSelect={true}
                     columns={this.state.columns}
                     rowGetter={this.rowGetter}
                     rowsCount={this.props.schema.length}
-                    minHeight={200} />
+                    minHeight={200} 
+                    onGridRowsUpdated={this.handleGridRowsUpdated} />
                 <br />
                 <button onClick={ () => this.props.onAddField(0)} >Add</button>
             </div>
@@ -96,15 +132,19 @@ function mapStateToProps (state: context.SchemaStateType): TableDefStateProps {
 
 function mapDispatchToProps(dispatch: any): TableDefDispatchProps {
     return {
-        onAddField: (pos: number) => {
-            let fieldDef: schema.FieldDef = schemaUtils.createFieldDef("1", "id1", "VARCHAR");
-            dispatch ( actions.addField(pos, fieldDef) );
-        },
         onImportCsv: (data: string) => {
             let fields = schemaUtils.csvToFields(data);
             for(let fieldDef of fields) {
                 dispatch ( actions.addField(0, fieldDef) );
             }
+        },
+        onAddField: (pos: number) => {
+            let fieldDef: schema.FieldDef = schemaUtils.createFieldDef("1", "id1", "VARCHAR");
+            dispatch ( actions.addField(pos, fieldDef) );
+        },
+        onModifyField: (index: number, fieldDef: schema.FieldDef) => {
+            //let fieldDef: schema.FieldDef = schemaUtils.createFieldDef("1", "id1", "VARCHAR");
+            dispatch ( actions.modifyField(index, fieldDef) );
         }
         
     };

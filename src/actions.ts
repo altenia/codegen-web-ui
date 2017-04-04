@@ -23,17 +23,16 @@ export type Action = ImportCsvAction | AddFieldAction | ModifyFieldAction
 export const importCvs = (data: string): Action => ({
   type: 'IMPORT_CSV',
   data: data
-})
+});
 
 export const addField = (position: number, fieldDef: schema.FieldDef): Action => ({
   type: 'ADD_FIELD',
   position: position,
   fieldDef: fieldDef
-})
-
+});
 
 export const modifyField = (index: number, fieldDef: schema.FieldDef): Action => ({
   type: 'MODIFY_FIELD',
   index: index,
   fieldDef: fieldDef
-})
+});
