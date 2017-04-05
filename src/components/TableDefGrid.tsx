@@ -14,6 +14,9 @@ import * as schemaUtils from '../schema-utils';
 import * as actions from '../actions';
 import * as context from '../context';
 
+//import javaentitygen from '../codegen/javaentitygen';
+import liquibasegen from '../codegen/liquibasegen';
+
 const { DropDownEditor } = Editors;
 const { DropDownFormatter } = Formatters;
 
@@ -43,10 +46,16 @@ interface TableDefState {
     importData: string
 }
 
+interface ComponentInputs {
+    generatedCode?: HTMLTextAreaElement;
+}
 
 // 'HelloProps' describes the shape of props.
 // State is never set so we use the 'undefined' type.
 class TableDefGrid extends React.Component<TableDefStateProps & TableDefDispatchProps, TableDefState> {
+
+    form: ComponentInputs = {};
+
 
     constructor() {
         super();
@@ -72,6 +81,7 @@ class TableDefGrid extends React.Component<TableDefStateProps & TableDefDispatch
         this.handleImportDataClick = this.handleImportDataClick.bind(this);
         this.handleImportDataChange = this.handleImportDataChange.bind(this);
         this.handleGridRowsUpdated = this.handleGridRowsUpdated.bind(this);
+        this.handleGenerateCodeClick = this.handleGenerateCodeClick.bind(this);
     }
     
     rowGetter(i: number) {
@@ -82,8 +92,12 @@ class TableDefGrid extends React.Component<TableDefStateProps & TableDefDispatch
         this.props.onImportCsv(this.state.importData);
     }
     
-    handleImportDataChange(event: any) {
+    handleImportDataChange(event: any)  {
         this.setState({importData: event.target.value});
+    }
+    
+    handleGenerateCodeClick(event: any)  {
+        this.form.generatedCode.value = liquibasegen(this.props.schema);
     }
     
     handleGridRowsUpdated({ fromRow, toRow, updated }: any) {
@@ -118,6 +132,10 @@ class TableDefGrid extends React.Component<TableDefStateProps & TableDefDispatch
                     onGridRowsUpdated={this.handleGridRowsUpdated} />
                 <br />
                 <button onClick={ () => this.props.onAddField(0)} >Add</button>
+                <button onClick={ this.handleGenerateCodeClick } >Generate</button>
+                // TODO: pending
+                <textarea name="generatedCode" ref={(input) => { this.form.generatedCode = input; }}
+                     ></textarea>
             </div>
         );
     }
